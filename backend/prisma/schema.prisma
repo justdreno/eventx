@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  password     String
+  role         String         @default("student")
+  avatar       String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  registrations Registration[]
+}
+
+model Event {
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  type          String         @default("other")
+  venue         String
+  startDate     DateTime
+  endDate       DateTime
+  coverImage    String?
+  status        String         @default("upcoming")
+  createdBy     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  registrations Registration[]
+  announcements Announcement[]
+}
+
+model Registration {
+  id           String   @id @default(cuid())
+  eventId      String
+  userId       String
+  ticketType   String   @default("attendee")
+  qrCode       String   @unique
+  registeredAt DateTime @default(now())
+  checkedIn    Boolean  @default(false)
+  checkedInAt  DateTime?
+  event        Event    @relation(fields: [eventId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  eventId   String?
+  priority  String   @default("low")
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  event     Event?   @relation(fields: [eventId], references: [id])
+}
