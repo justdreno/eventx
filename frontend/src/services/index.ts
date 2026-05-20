@@ -3,3 +3,4 @@ export { authService } from './auth.service';
 export { announcementService } from './announcement.service';
 export { registrationService } from './registration.service';
 export { liveUpdateService } from './live-update.service';
+export { adminService } from './admin.service';

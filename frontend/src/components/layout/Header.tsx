@@ -134,6 +134,22 @@ export function Header() {
         >
           {isAuthenticated ? (
             <>
+              {(user?.role === 'admin' || user?.role === 'teacher') && (
+                <Link
+                  href="/admin"
+                  data-testid="nav-admin-link"
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--text-secondary)',
+                    fontWeight: 450,
+                    padding: '8px 16px',
+                    transition: 'color 0.2s',
+                  }}
+                  className="nav-link"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/my-registrations"
                 data-testid="nav-my-registrations"
@@ -268,40 +284,60 @@ export function Header() {
                 </Link>
               ))}
               {isAuthenticated ? (
-                <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-                  <Link
-                    href="/my-registrations"
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      flex: 1,
-                      padding: '14px 0',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--black)',
-                      color: 'var(--white)',
-                      fontWeight: 600,
-                      fontSize: 15,
-                      textAlign: 'center',
-                    }}
-                  >
-                    My registrations
-                  </Link>
-                  <button
-                    onClick={() => { logout(); setMenuOpen(false); }}
-                    style={{
-                      flex: 1,
-                      padding: '14px 0',
-                      borderRadius: 'var(--radius-full)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text)',
-                      fontWeight: 500,
-                      fontSize: 15,
-                      textAlign: 'center',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Sign out
-                  </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
+                  {(user?.role === 'admin' || user?.role === 'teacher') && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        padding: '14px 0',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--black)',
+                        color: 'var(--white)',
+                        fontWeight: 600,
+                        fontSize: 15,
+                        textAlign: 'center',
+                      }}
+                    >
+                      Admin dashboard
+                    </Link>
+                  )}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <Link
+                      href="/my-registrations"
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        flex: 1,
+                        padding: '14px 0',
+                        borderRadius: 'var(--radius-full)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text)',
+                        fontWeight: 500,
+                        fontSize: 15,
+                        textAlign: 'center',
+                        background: 'transparent',
+                      }}
+                    >
+                      My registrations
+                    </Link>
+                    <button
+                      onClick={() => { logout(); setMenuOpen(false); }}
+                      style={{
+                        flex: 1,
+                        padding: '14px 0',
+                        borderRadius: 'var(--radius-full)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text)',
+                        fontWeight: 500,
+                        fontSize: 15,
+                        textAlign: 'center',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Sign out
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>

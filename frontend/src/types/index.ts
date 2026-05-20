@@ -69,6 +69,21 @@ export interface CalendarEvent {
   type: 'event' | 'holiday' | 'deadline' | 'meeting';
 }
 
+export interface AdminStats {
+  counts: {
+    events: number;
+    users: number;
+    registrations: number;
+    announcements: number;
+  };
+  eventsByStatus: { status: string; _count: { id: number } }[];
+  recentRegistrations: (Registration & { user: { id: string; name: string; email: string } })[];
+}
+
+export interface RegistrationWithUser extends Registration {
+  user: { id: string; name: string; email: string };
+}
+
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
