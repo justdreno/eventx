@@ -57,42 +57,46 @@ export function Header() {
         }}
       >
         {/* Logo */}
-        <Link
-          href="/"
-          data-testid="logo-link"
-          style={{
-            fontWeight: 700,
-            fontSize: 20,
-            letterSpacing: '-0.04em',
-            color: 'var(--text)',
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          Event<span style={{ fontWeight: 300 }}>X</span>
-          <span style={{
-            fontSize: 9,
-            fontWeight: 500,
-            background: 'var(--gray-100)',
-            color: 'var(--gray-500)',
-            padding: '2px 6px',
-            borderRadius: 4,
-            marginLeft: 6,
-            letterSpacing: '0.5px',
-            textTransform: 'uppercase',
-          }}>
-            v2
-          </span>
-        </Link>
+        <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-start' }}>
+          <Link
+            href="/"
+            data-testid="logo-link"
+            style={{
+              fontWeight: 700,
+              fontSize: 20,
+              letterSpacing: '-0.04em',
+              color: 'var(--text)',
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            Event<span style={{ fontWeight: 300 }}>X</span>
+            <span style={{
+              fontSize: 9,
+              fontWeight: 500,
+              background: 'var(--gray-100)',
+              color: 'var(--gray-500)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              marginLeft: 6,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+            }}>
+              v2
+            </span>
+          </Link>
+        </div>
 
         {/* Desktop nav */}
         <nav
           style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 32,
+            flex: '0 0 auto',
           }}
           className="nav-desktop"
         >
@@ -120,8 +124,10 @@ export function Header() {
         {/* Right actions */}
         <div
           style={{
+            flex: '1 1 0',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'flex-end',
             gap: 8,
           }}
           className="nav-desktop"
