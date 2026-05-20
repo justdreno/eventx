@@ -8,95 +8,15 @@ Built with **Next.js 16**, **Express 5**, **Prisma**, **SQLite**, and **framer-m
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         BROWSER                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │ Landing  │  │  Events  │  │Registra- │  │ Announcements  │  │
-│  │  Page    │  │  Browse  │  │  tions   │  │                │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────────┘  │
-│                        │                        │               │
-│                        ▼                        ▼               │
-│              ┌─────────────────────────────────────┐            │
-│              │       Next.js App Router            │            │
-│              │  ┌──────────┐  ┌──────────────────┐ │            │
-│              │  │ Auth     │  │  API Client      │ │            │
-│              │  │ (JWT)    │  │  (fetch wrapper) │ │            │
-│              │  └──────────┘  └────────┬─────────┘ │            │
-│              └─────────────────────────┼───────────┘            │
-└────────────────────────────────────────┼────────────────────────┘
-                                         │ HTTP (JSON)
-                                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    EXPRESS API SERVER (Port 5000)               │
-│                                                                 │
-│  ┌─────────┐  ┌─────────┐  ┌────────────┐  ┌──────────────┐   │
-│  │  Auth   │  │ Events  │  │Registrations│  │Announcements │   │
-│  │ Routes  │  │ Routes  │  │   Routes    │  │   Routes     │   │
-│  └────┬────┘  └────┬────┘  └──────┬──────┘  └──────┬───────┘   │
-│       │            │              │                │           │
-│       ▼            ▼              ▼                ▼           │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │              Middleware Pipeline                        │    │
-│  │  ┌──────────┐  ┌───────────┐  ┌──────────────────┐    │    │
-│  │  │   CORS   │  │   JSON    │  │  JWT Auth Guard  │    │    │
-│  │  └──────────┘  └───────────┘  └──────────────────┘    │    │
-│  └──────────────────────┬─────────────────────────────────┘    │
-│                         │                                      │
-│                         ▼                                      │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │                    Prisma ORM                          │    │
-│  │  ┌──────────────────────────────────────────────────┐  │    │
-│  │  │              SQLite Database                      │  │    │
-│  │  │  ┌──────┐  ┌──────┐  ┌──────────┐  ┌──────────┐ │  │    │
-│  │  │  │ User │  │Event │  │Registra- │  │Announce- │ │  │    │
-│  │  │  │      │  │      │  │  tion    │  │  ment    │ │  │    │
-│  │  │  └──────┘  └──────┘  └──────────┘  └──────────┘ │  │    │
-│  │  └──────────────────────────────────────────────────┘  │    │
-│  └────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Data Flow — Registration
-
-```
-User clicks "Register" ──► POST /api/registrations (with JWT)
-        │
-        ▼
-  Express auth middleware ──► JWT verified ──► userId extracted
-        │
-        ▼
-  Prisma checks: event exists? already registered?
-        │
-        ▼
-  crypto.randomUUID() generates unique QR code
-        │
-        ▼
-  Registration saved ──► Response with QR code
-        │
-        ▼
-  Frontend renders QR via api.qrserver.com
-        │
-        ▼
-  User shows QR at venue ──► Admin scans/checks in
-```
+![Architecture](https://mermaid.ink/img/Z3JhcGggVEIKICAgIHN1YmdyYXBoIEJyb3dzZXJbQnJvd3Nlcl0KICAgICAgICBMW0xhbmRpbmcgUGFnZV0KICAgICAgICBFW0V2ZW50cyBCcm93c2VdCiAgICAgICAgUltNeSBSZWdpc3RyYXRpb25zXQogICAgICAgIEFbQW5ub3VuY2VtZW50c10KICAgIGVuZAogICAgc3ViZ3JhcGggTmV4dFtOZXh0LmpzIEFwcCBSb3V0ZXJdCiAgICAgICAgQUNbQVBJIENsaWVudF0KICAgICAgICBKV1RbQXV0aCBKV1RdCiAgICBlbmQKICAgIHN1YmdyYXBoIEV4cHJlc3NbRXhwcmVzcyBBUEkgU2VydmVyXQogICAgICAgIEF1dGhSW0F1dGggUm91dGVzXQogICAgICAgIEV2ZW50UltFdmVudCBSb3V0ZXNdCiAgICAgICAgUmVnUltSZWdpc3RyYXRpb24gUm91dGVzXQogICAgICAgIEFublJbQW5ub3VuY2VtZW50IFJvdXRlc10KICAgIGVuZAogICAgREJbKFNRTGl0ZSBEYXRhYmFzZSldCiAgICBMIC0tPiBBQwogICAgRSAtLT4gQUMKICAgIFIgLS0+IEFDCiAgICBBIC0tPiBBQwogICAgQUMgLS0+IEV4cHJlc3MKICAgIEpXVCAtLT4gRXhwcmVzcwogICAgQXV0aFIgLS0+IERCCiAgICBFdmVudFIgLS0+IERCCiAgICBSZWdSIC0tPiBEQgogICAgQW5uUiAtLT4gREINCg==)
 
 ### Data Flow — Auth
 
-```
-Register ──► POST /api/auth/register
-  ├── bcrypt.hash(password, 12)
-  ├── Prisma creates user
-  └── jwt.sign({ userId, role }) ──► token stored in localStorage
+![Auth Flow](https://mermaid.ink/img/c2VxdWVuY2VEaWFncmFtCiAgICBwYXJ0aWNpcGFudCBVIGFzIFVzZXIKICAgIHBhcnRpY2lwYW50IEZFIGFzIEZyb250ZW5kCiAgICBwYXJ0aWNpcGFudCBCRSBhcyBCYWNrZW5kCiAgICBwYXJ0aWNpcGFudCBEQiBhcyBTUUxpdGUKICAgIFUtPj5GRTogUmVnaXN0ZXIgLyBMb2dpbgogICAgRkUtPj5CRTogUE9TVCAvYXV0aC9yZWdpc3RlciBvciAvYXV0aC9sb2dpbgogICAgQkUtPj5CRTogYmNyeXB0IGhhc2ggLyBjb21wYXJlCiAgICBCRS0+PkRCOiBDcmVhdGUgLyBGaW5kIHVzZXIKICAgIERCLS0+PkJFOiBVc2VyIGRhdGEKICAgIEJFLT4+QkU6IGp3dC5zaWduKHVzZXJJZCwgcm9sZSkKICAgIEJFLS0+PkZFOiB7IHVzZXIsIHRva2VuIH0KICAgIEZFLT4+RkU6IFN0b3JlIGluIGxvY2FsU3RvcmFnZQogICAgRkUtPj5GRTogUmVkaXJlY3QgdG8gL2V2ZW50cw0K)
 
-Login ──► POST /api/auth/login
-  ├── bcrypt.compare(password, hash)
-  └── jwt.sign({ userId, role }) ──► token stored in localStorage
+### Data Flow — Registration
 
-/me ──► GET /api/auth/me (Bearer token)
-  ├── jwt.verify(token) ──► userId
-  └── Prisma user lookup
-```
+![Registration Flow](https://mermaid.ink/img/c2VxdWVuY2VEaWFncmFtCiAgICBwYXJ0aWNpcGFudCBTIGFzIFN0dWRlbnQKICAgIHBhcnRpY2lwYW50IEZFIGFzIEZyb250ZW5kCiAgICBwYXJ0aWNpcGFudCBCRSBhcyBCYWNrZW5kCiAgICBwYXJ0aWNpcGFudCBEQiBhcyBTUUxpdGUKICAgIFMtPj5GRTogQ2xpY2sgUmVnaXN0ZXIKICAgIEZFLT4+QkU6IFBPU1QgL3JlZ2lzdHJhdGlvbnMgKEpXVCkKICAgIEJFLT4+REI6IENoZWNrIGV2ZW50IGV4aXN0cwogICAgQkUtPj5EQjogQ2hlY2sgbm90IGR1cGxpY2F0ZQogICAgQkUtPj5CRTogY3J5cHRvLnJhbmRvbVVVSUQoKQogICAgTm90ZSBvdmVyIEJFOiBHZW5lcmF0ZXMgdW5pcXVlIFFSIGNvZGUKICAgIEJFLT4+REI6IElOU0VSVCByZWdpc3RyYXRpb24KICAgIERCLS0+PkJFOiBSZWdpc3RyYXRpb24KICAgIEJFLS0+PkZFOiB7IHFyQ29kZSwgZXZlbnQgfQogICAgRkUtPj5GRTogUmVuZGVyIFFSIHZpYSBhcGkucXJzZXJ2ZXIuY29tCiAgICBTLT4+UzogU2hvdyBRUiBhdCB2ZW51ZQogICAgRkUtPj5CRTogUFVUIC9yZWdpc3RyYXRpb25zLzppZC9jaGVja2luCiAgICBCRS0+PkRCOiBVUERBVEUgY2hlY2tlZEluPXRydWUKICAgIERCLS0+PkJFOiBTdWNjZXNzCiAgICBCRS0tPj5GRTogeyBjaGVja2VkSW46IHRydWUgfQ0K)
 
 ---
 
@@ -117,77 +37,7 @@ Login ──► POST /api/auth/login
 
 ## Database Schema
 
-```
-┌──────────────────────────────┐
-│            User              │
-├──────────────────────────────┤
-│  id          String (cuid)   │
-│  name        String          │
-│  email       String (unique) │
-│  password    String (bcrypt) │
-│  role        String          │
-│  avatar      String?         │
-│  createdAt   DateTime        │
-│  updatedAt   DateTime        │
-├──────────────────────────────┤
-│  registrations Registration[]│
-└──────────────┬───────────────┘
-               │ 1
-               │
-               │ *
-               ▼
-┌──────────────────────────────┐
-│        Registration          │
-├──────────────────────────────┤
-│  id           String (cuid)  │
-│  eventId      String         │──┐
-│  userId       String         │  │
-│  ticketType   String         │  │
-│  qrCode       String (uuid)  │  │
-│  registeredAt DateTime       │  │
-│  checkedIn    Boolean        │  │
-│  checkedInAt  DateTime?      │  │
-├──────────────────────────────┤  │
-│  event  Event  (FK)          │◄─┤
-│  user   User   (FK)          │◄─┘
-└──────────────────────────────┘
-
-┌──────────────────────────────┐
-│           Event              │
-├──────────────────────────────┤
-│  id          String (cuid)   │
-│  title       String          │
-│  description String          │
-│  type        String          │
-│  venue       String          │
-│  startDate   DateTime        │
-│  endDate     DateTime        │
-│  coverImage  String?         │
-│  status      String          │
-│  createdBy   String          │
-│  createdAt   DateTime        │
-│  updatedAt   DateTime        │
-├──────────────────────────────┤
-│  registrations Registration[]│
-│  announcements Announcement[]│
-└──────────────┬───────────────┘
-               │ 1
-               │
-               │ *
-               ▼
-┌──────────────────────────────┐
-│        Announcement          │
-├──────────────────────────────┤
-│  id          String (cuid)   │
-│  title       String          │
-│  content     String          │
-│  eventId     String? (FK)    │──┘
-│  priority    String          │
-│  createdBy   String          │
-│  createdAt   DateTime        │
-│  updatedAt   DateTime        │
-└──────────────────────────────┘
-```
+![Schema](https://mermaid.ink/img/ZXJEaWFncmFtCiAgICBVc2VyIHx8LS1veyBSZWdpc3RyYXRpb24gOiBoYXMKICAgIEV2ZW50IHx8LS1veyBSZWdpc3RyYXRpb24gOiBoYXMKICAgIEV2ZW50IHx8LS1veyBBbm5vdW5jZW1lbnQgOiBoYXMKICAgIFVzZXIgewogICAgICAgIHN0cmluZyBpZCBQSwogICAgICAgIHN0cmluZyBuYW1lCiAgICAgICAgc3RyaW5nIGVtYWlsIFVLCiAgICAgICAgc3RyaW5nIHBhc3N3b3JkCiAgICAgICAgc3RyaW5nIHJvbGUKICAgIH0KICAgIEV2ZW50IHsKICAgICAgICBzdHJpbmcgaWQgUEsKICAgICAgICBzdHJpbmcgdGl0bGUKICAgICAgICBzdHJpbmcgZGVzY3JpcHRpb24KICAgICAgICBzdHJpbmcgdHlwZQogICAgICAgIHN0cmluZyB2ZW51ZQogICAgICAgIGRhdGV0aW1lIHN0YXJ0RGF0ZQogICAgICAgIGRhdGV0aW1lIGVuZERhdGUKICAgICAgICBzdHJpbmcgc3RhdHVzCiAgICB9CiAgICBSZWdpc3RyYXRpb24gewogICAgICAgIHN0cmluZyBpZCBQSwogICAgICAgIHN0cmluZyBldmVudElkIEZLCiAgICAgICAgc3RyaW5nIHVzZXJJZCBGSwogICAgICAgIHN0cmluZyBxckNvZGUgVUsKICAgICAgICBib29sZWFuIGNoZWNrZWRJbgogICAgICAgIGRhdGV0aW1lIHJlZ2lzdGVyZWRBdAogICAgfQogICAgQW5ub3VuY2VtZW50IHsKICAgICAgICBzdHJpbmcgaWQgUEsKICAgICAgICBzdHJpbmcgdGl0bGUKICAgICAgICBzdHJpbmcgY29udGVudAogICAgICAgIHN0cmluZyBldmVudElkIEZLCiAgICAgICAgc3RyaW5nIHByaW9yaXR5CiAgICAgICAgZGF0ZXRpbWUgY3JlYXRlZEF0CiAgICB9DQo=)
 
 ---
 
@@ -297,59 +147,7 @@ GET /events?type=debate&status=upcoming&search=spring
 
 ---
 
-## Setup
-
-### Prerequisites
-- Node.js 20+
-- npm
-
-### Backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env   # Edit as needed
-npx prisma generate
-npx prisma db push
-npm run db:seed        # Seeds 3 users, 6 events, 5 announcements
-npm run dev            # Starts on port 5000
-```
-
-#### Seed users (password: `password123`)
-| Email              | Role    |
-| ------------------ | ------- |
-| admin@school.edu   | admin   |
-| teacher@school.edu | teacher |
-| student@school.edu | student |
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-cp .env.local.example .env.local   # Set NEXT_PUBLIC_API_URL
-npm run dev                        # Starts on port 3000
-```
-
-### Environment Variables
-
-**Backend `.env`**
-```
-PORT=5000
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="your-secret-here"
-JWT_EXPIRES_IN="7d"
-CORS_ORIGIN="http://localhost:3000"
-```
-
-**Frontend `.env.local`**
-```
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
-
----
-
-## Deployment (VPS)
+## Deployment
 
 ```bash
 git pull
