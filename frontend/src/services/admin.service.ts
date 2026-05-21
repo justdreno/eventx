@@ -1,8 +1,9 @@
 import { apiClient } from '@/lib';
-import type { AdminStats, AdminEvent, AdminUser, AdminRegistration, AdminLiveUpdate, ApiResponse } from '@/types';
+import type { AdminStats, AdminEvent, AdminUser, AdminRegistration, AdminLiveUpdate, ChartData, ApiResponse } from '@/types';
 
 export const adminService = {
   getStats: () => apiClient.get<ApiResponse<AdminStats>>('/admin/stats'),
+  getChartData: () => apiClient.get<ApiResponse<ChartData>>('/admin/stats/charts'),
   getEvents: (params?: { type?: string; status?: string; search?: string }) =>
     apiClient.get<ApiResponse<AdminEvent[]>>('/admin/events', { params }),
   getUsers: () => apiClient.get<ApiResponse<AdminUser[]>>('/admin/users'),

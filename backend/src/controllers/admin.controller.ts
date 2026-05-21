@@ -170,6 +170,52 @@ export class AdminController {
     }
   }
 
+  async getChartData(_req: AuthRequest, res: Response, _next: NextFunction) {
+    try {
+      const now = new Date();
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      const registrations = await prisma.registration.findMany({
+        where: { registeredAt: { gte: sixMonthsAgo } },
+        select: { registeredAt: true },
+      });
+
+      const registrationsOverTime: { month: string; count: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const month = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
+        const count = registrations.filter((r: { registeredAt: Date }) => {
+          const rDate = new Date(r.registeredAt);
+          return rDate.getMonth() === d.getMonth() && rDate.getFullYear() === d.getFullYear();
+        }).length;
+        registrationsOverTime.push({ month, count });
+      }
+
+      const eventsByType = await prisma.event.groupBy({
+        by: ['type'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+      });
+
+      const registrationsByEvent = await prisma.event.findMany({
+        take: 10,
+        orderBy: { registrations: { _count: 'desc' } },
+        select: {
+          title: true,
+          _count: { select: { registrations: true } },
+        },
+      });
+
+      return sendSuccess(res, {
+        registrationsOverTime,
+        eventsByType: eventsByType.map((e: { type: string; _count: { id: number } }) => ({ type: e.type, count: e._count.id })),
+        registrationsByEvent: registrationsByEvent.map((e: { title: string; _count: { registrations: number } }) => ({ title: e.title, count: e._count.registrations })),
+      });
+    } catch (err) {
+      return sendError(res, (err as Error).message);
+    }
+  }
+
   async deleteUser(req: AuthRequest, res: Response, _next: NextFunction) {
     try {
       const id = req.params.id as string;

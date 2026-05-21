@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { adminService } from '@/services';
 import { useAuth } from '@/hooks';
-import type { AdminStats } from '@/types';
+import { BarChart, HorizontalBar } from '@/components/ui/bar-chart';
+import type { AdminStats, ChartData } from '@/types';
 
 const statusColors: Record<string, string> = {
   upcoming: '#2563eb',
@@ -92,6 +93,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [statsError, setStatsError] = useState<string | null>(null);
 
@@ -103,8 +105,12 @@ export default function AdminPage() {
       router.push('/login');
       return;
     }
-    adminService.getStats().then((res) => {
-      if (res.success && res.data) setStats(res.data);
+    Promise.all([
+      adminService.getStats(),
+      adminService.getChartData(),
+    ]).then(([statsRes, chartRes]) => {
+      if (statsRes.success && statsRes.data) setStats(statsRes.data);
+      if (chartRes.success && chartRes.data) setChartData(chartRes.data);
     }).catch(() => setStatsError('Failed to load dashboard data.')).finally(() => setLoading(false));
   }, [isAuthenticated, isAdmin, authLoading, router]);
 
@@ -183,6 +189,60 @@ export default function AdminPage() {
                 </motion.div>
               ))}
           </div>
+
+          {/* Charts */}
+          {chartData && (chartData.registrationsOverTime.some(d => d.count > 0) || chartData.eventsByType.length > 0) && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 48 }} className="admin-chart-grid">
+              {chartData.registrationsOverTime.some(d => d.count > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  style={{ padding: 24, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--white)' }}
+                >
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 20, letterSpacing: '-0.01em' }}>
+                    Registrations over time
+                  </h3>
+                  <BarChart
+                    data={chartData.registrationsOverTime.map((d) => ({ label: d.month, value: d.count, color: '#2563eb' }))}
+                    height={180}
+                  />
+                </motion.div>
+              )}
+              {chartData.eventsByType.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.15 }}
+                  style={{ padding: 24, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--white)' }}
+                >
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 20, letterSpacing: '-0.01em' }}>
+                    Events by type
+                  </h3>
+                  <HorizontalBar
+                    data={chartData.eventsByType.map((d) => ({ label: d.type, value: d.count, color: '#7c3aed' }))}
+                    height={chartData.eventsByType.length * 32 + 16}
+                  />
+                </motion.div>
+              )}
+              {chartData.registrationsByEvent.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  style={{ padding: 24, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--white)' }}
+                >
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 20, letterSpacing: '-0.01em' }}>
+                    Top events by registrations
+                  </h3>
+                  <HorizontalBar
+                    data={chartData.registrationsByEvent.map((d) => ({ label: d.title, value: d.count, color: '#16a34a' }))}
+                    height={Math.min(chartData.registrationsByEvent.length, 8) * 32 + 16}
+                  />
+                </motion.div>
+              )}
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }} className="admin-grid">
             {/* Recent registrations */}
@@ -318,7 +378,7 @@ export default function AdminPage() {
           background: var(--gray-50) !important;
         }
         @media (max-width: 768px) {
-          .admin-grid {
+          .admin-grid, .admin-chart-grid {
             grid-template-columns: 1fr !important;
           }
         }

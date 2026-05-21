@@ -6,6 +6,7 @@ const router = Router();
 const controller = new AdminController();
 
 router.get('/stats', authenticate, authorize('admin', 'teacher'), controller.getStats);
+router.get('/stats/charts', authenticate, authorize('admin', 'teacher'), controller.getChartData);
 router.get('/events', authenticate, authorize('admin', 'teacher'), controller.getEvents);
 router.get('/users', authenticate, authorize('admin', 'teacher'), controller.getUsers);
 router.put('/users/:id', authenticate, authorize('admin'), controller.updateUser);

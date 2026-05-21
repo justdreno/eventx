@@ -107,6 +107,12 @@ export interface AdminUser {
   _count: { registrations: number; events: number };
 }
 
+export interface ChartData {
+  registrationsOverTime: { month: string; count: number }[];
+  eventsByType: { type: string; count: number }[];
+  registrationsByEvent: { title: string; count: number }[];
+}
+
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
