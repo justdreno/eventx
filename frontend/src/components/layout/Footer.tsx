@@ -31,20 +31,9 @@ export function Footer() {
         </div>
 
         <div style={{ display: 'flex', gap: 20 }}>
-          <Link
-            href="/events"
-            style={{ fontSize: 13, color: 'var(--text-muted)', transition: 'color 0.2s' }}
-            className="footer-min-link"
-          >
-            Events
-          </Link>
-          <Link
-            href="/announcements"
-            style={{ fontSize: 13, color: 'var(--text-muted)', transition: 'color 0.2s' }}
-            className="footer-min-link"
-          >
-            Announcements
-          </Link>
+          <Link href="/events" style={{ fontSize: 13, color: 'var(--text-muted)', transition: 'color 0.2s' }} className="footer-min-link">Events</Link>
+          <Link href="/calendar" style={{ fontSize: 13, color: 'var(--text-muted)', transition: 'color 0.2s' }} className="footer-min-link">Calendar</Link>
+          <Link href="/announcements" style={{ fontSize: 13, color: 'var(--text-muted)', transition: 'color 0.2s' }} className="footer-min-link">Announcements</Link>
         </div>
       </div>
 

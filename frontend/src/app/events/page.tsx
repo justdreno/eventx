@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Select from '@/components/ui/select';
+import Countdown from '@/components/ui/countdown';
 import { eventService } from '@/services';
 import type { Event } from '@/types';
 
@@ -270,7 +271,7 @@ export default function EventsPage() {
                         <h3 style={{ fontSize: 17, fontWeight: 600, color: 'var(--text)', margin: '6px 0 10px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
                           {event.title}
                         </h3>
-                        <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
+                        <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-secondary)', marginBottom: event.status === 'upcoming' ? 12 : 0 }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
                             {new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -280,6 +281,17 @@ export default function EventsPage() {
                             {event.venue}
                           </span>
                         </div>
+                        {event.status === 'upcoming' && (
+                          <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'var(--gray-50)', border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Starts in</div>
+                            <Countdown targetDate={event.startDate} size="sm" />
+                          </div>
+                        )}
+                        {event.status === 'ongoing' && (
+                          <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', background: '#16a34a10', border: '1px solid #16a34a30', fontSize: 12, fontWeight: 600, color: '#16a34a', textAlign: 'center' }}>
+                            Live now
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Link>

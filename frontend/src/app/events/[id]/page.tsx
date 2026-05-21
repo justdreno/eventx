@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Countdown from '@/components/ui/countdown';
 import { eventService, registrationService, announcementService, liveUpdateService } from '@/services';
 import { useAuth } from '@/hooks';
 import type { Event, Registration, Announcement, LiveUpdate } from '@/types';
@@ -207,6 +208,18 @@ export default function EventDetailPage() {
               {event.venue}
             </span>
           </div>
+          {event.status === 'upcoming' && (
+            <div style={{ marginTop: 24, display: 'inline-block', padding: '14px 20px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Countdown</div>
+              <Countdown targetDate={event.startDate} size="md" />
+            </div>
+          )}
+          {event.status === 'ongoing' && (
+            <div style={{ marginTop: 24, padding: '10px 20px', borderRadius: 'var(--radius-md)', background: 'rgba(22,163,74,0.15)', display: 'inline-flex', alignItems: 'center', gap: 8, color: '#86efac', fontSize: 14, fontWeight: 600 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', display: 'inline-block', animation: 'ev-pulse 2s infinite' }} />
+              Live now
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -489,6 +502,10 @@ export default function EventDetailPage() {
         }
         .ev-edit-btn:hover {
           background: rgba(255,255,255,0.22) !important;
+        }
+        @keyframes ev-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
         @media (max-width: 768px) {
           .ev-detail-grid {

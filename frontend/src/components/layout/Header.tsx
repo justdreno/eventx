@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks';
 
 const navLinks = [
   { label: 'Events', href: '/events' },
+  { label: 'Calendar', href: '/calendar' },
   { label: 'Announcements', href: '/announcements' },
 ];
 
