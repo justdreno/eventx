@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarW = collapsed ? 64 : 240;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--gray-50)' }}>
+    <div className={mobileOpen ? 'admin-mobile-open' : ''} style={{ display: 'flex', minHeight: '100vh', background: 'var(--gray-50)' }}>
       {/* Sidebar */}
       <motion.aside
         animate={{ width: sidebarW }}
@@ -256,6 +256,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }
           .admin-mobile-open .admin-sidebar {
             display: flex !important;
+            width: 280px !important;
           }
         }
       `}</style>

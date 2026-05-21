@@ -10,7 +10,6 @@ const roles: { value: User['role']; label: string }[] = [
   { value: 'student', label: 'Student' },
   { value: 'teacher', label: 'Teacher' },
   { value: 'parent', label: 'Parent' },
-  { value: 'admin', label: 'Admin' },
 ];
 
 export default function RegisterPage() {
@@ -26,6 +25,8 @@ export default function RegisterPage() {
     setFormError(null);
     if (!name.trim()) { setFormError('Name is required'); return; }
     if (!email.trim()) { setFormError('Email is required'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { setFormError('Please enter a valid email address.'); return; }
     if (!password || password.length < 6) { setFormError('Password must be at least 6 characters'); return; }
     try {
       await register(name, email, password, role);

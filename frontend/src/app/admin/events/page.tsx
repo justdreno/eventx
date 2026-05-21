@@ -23,6 +23,7 @@ export default function AdminEventsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchEvents = () => {
     setLoading(true);
@@ -32,7 +33,7 @@ export default function AdminEventsPage() {
     if (search.trim()) params.search = search.trim();
     adminService.getEvents(params).then((res) => {
       if (res.success && res.data) setEvents(res.data);
-    }).finally(() => setLoading(false));
+    }).catch(() => setFetchError('Failed to load events.')).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchEvents(); }, [typeFilter, statusFilter]);
@@ -42,14 +43,13 @@ export default function AdminEventsPage() {
   }, [search]);
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeleting(id);
     try {
       const { eventService } = await import('@/services');
       await eventService.delete(id);
       setEvents((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
-      alert((err as Error).message);
+      setFetchError('Failed to delete event.');
     } finally {
       setDeleting(null);
     }

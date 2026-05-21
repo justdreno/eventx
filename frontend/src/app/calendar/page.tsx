@@ -66,9 +66,12 @@ export default function CalendarPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '140px 32px', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid var(--border)', borderTopColor: 'var(--black)', animation: 'cal-spin 0.6s linear infinite' }} />
-        <style>{'@keyframes cal-spin { to { transform: rotate(360deg) } }'}</style>
+      <div style={{ padding: '140px 32px', maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, marginTop: 24 }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} style={{ height: 180, borderRadius: 'var(--radius-lg)', background: 'var(--gray-100)', animation: 'shimmer 2s infinite linear', backgroundImage: 'linear-gradient(90deg, var(--gray-100) 0%, var(--gray-200) 40%, var(--gray-100) 80%)', backgroundSize: '200% 100%' }} />
+          ))}
+        </div>
       </div>
     );
   }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Select from '@/components/ui/select';
 import { adminService } from '@/services';
@@ -18,22 +18,26 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchUsers = () => {
     setLoading(true);
     adminService.getUsers().then((res) => {
       if (res.success && res.data) setUsers(res.data);
-    }).finally(() => setLoading(false));
+    }).catch(() => setFetchError('Failed to load users.')).finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(fetchUsers, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleRoleChange = async (id: string, role: string) => {
     try {
       await adminService.updateUser(id, { role });
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, role } : u));
     } catch (err) {
-      alert((err as Error).message);
+      setFetchError((err as Error).message);
     }
   };
 
@@ -44,7 +48,7 @@ export default function AdminUsersPage() {
       await adminService.deleteUser(id);
       setUsers((prev) => prev.filter((u) => u.id !== id));
     } catch (err) {
-      alert((err as Error).message);
+      setFetchError((err as Error).message);
     } finally {
       setDeleting(null);
     }

@@ -17,6 +17,7 @@ export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     announcementService
@@ -24,6 +25,7 @@ export default function AnnouncementsPage() {
       .then((res) => {
         if (res.success && res.data) setAnnouncements(res.data);
       })
+      .catch(() => setError('Failed to load announcements.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -81,10 +83,19 @@ export default function AnnouncementsPage() {
                 <div key={i} style={{ height: 120, borderRadius: 'var(--radius-md)', background: 'var(--gray-100)', animation: 'shimmer 2s infinite linear', backgroundImage: 'linear-gradient(90deg, var(--gray-100) 0%, var(--gray-200) 40%, var(--gray-100) 80%)', backgroundSize: '200% 100%' }} />
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : filtered.length === 0 && !loading ? (
             <div style={{ textAlign: 'center', padding: '60px 0' }}>
-              <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>No announcements</p>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 6 }}>Check back later for updates.</p>
+              <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+                {error || 'No announcements yet'}
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
+                {error ? 'Something went wrong.' : 'Check back later for updates from the school.'}
+              </p>
+              {!error && (
+                <Link href="/events" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-full)', background: 'var(--black)', color: 'var(--white)', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+                  Browse events
+                </Link>
+              )}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

@@ -35,7 +35,7 @@ export default function EditEventPage() {
         setEndDate(new Date(e.endDate).toISOString().slice(0, 16));
         setStatus(e.status);
       }
-    }).finally(() => setLoading(false));
+    }).catch(() => setError('Failed to load event details.')).finally(() => setLoading(false));
   }, [id]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -44,6 +44,8 @@ export default function EditEventPage() {
     if (!title.trim()) { setError('Title is required'); return; }
     if (!description.trim()) { setError('Description is required'); return; }
     if (!venue.trim()) { setError('Venue is required'); return; }
+    if (!startDate || !endDate) { setError('Start and end dates are required'); return; }
+    if (new Date(endDate) <= new Date(startDate)) { setError('End date must be after start date'); return; }
     setSubmitting(true);
     try {
       const res = await eventService.update(id, {

@@ -29,6 +29,7 @@ export default function MyRegistrationsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -41,6 +42,7 @@ export default function MyRegistrationsPage() {
       .then((res) => {
         if (res.success && res.data) setRegistrations(res.data);
       })
+      .catch(() => setError('Failed to load registrations.'))
       .finally(() => setLoading(false));
   }, [isAuthenticated, authLoading, router]);
 
@@ -78,13 +80,19 @@ export default function MyRegistrationsPage() {
 
       <section style={{ padding: '48px 32px 80px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          {registrations.length === 0 ? (
+          {registrations.length === 0 && !loading ? (
             <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>No registrations yet</p>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>Browse events and register to get started.</p>
-              <Link href="/events" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-full)', background: 'var(--black)', color: 'var(--white)', fontWeight: 600, fontSize: 14, letterSpacing: '-0.01em', transition: 'opacity 0.2s' }} className="ev-cta">
-                Browse events
-              </Link>
+              <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+                {error || 'No registrations yet'}
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
+                {error ? 'Something went wrong loading your registrations.' : 'Browse events and register to get started.'}
+              </p>
+              {!error && (
+                <Link href="/events" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-full)', background: 'var(--black)', color: 'var(--white)', fontWeight: 600, fontSize: 14, letterSpacing: '-0.01em', transition: 'opacity 0.2s' }} className="ev-cta">
+                  Browse events
+                </Link>
+              )}
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>

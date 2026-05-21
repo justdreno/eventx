@@ -32,6 +32,7 @@ export default function EventsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -40,6 +41,7 @@ export default function EventsPage() {
       .then((res) => {
         if (res.success && res.data) setEvents(res.data);
       })
+      .catch(() => setError('Failed to load events. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -205,10 +207,20 @@ export default function EventsPage() {
                 />
               ))}
             </div>
-          ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>No events found</p>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Try adjusting your filters or check back later.</p>
+          ) : filtered.length === 0 && !loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+                {error || (search || typeFilter !== 'all' || statusFilter !== 'all' ? 'No events match your filters' : 'No events yet')}
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+                {error ? 'Something went wrong loading events.' : 'Try adjusting your search or filters.'}
+              </p>
+              {(search || typeFilter !== 'all' || statusFilter !== 'all') && (
+                <button onClick={() => { setSearch(''); setTypeFilter('all'); setStatusFilter('all'); }}
+                  style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-full)', background: 'var(--black)', color: 'var(--white)', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none' }}>
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>

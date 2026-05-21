@@ -21,6 +21,8 @@ export default function AdminLiveUpdatesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   const [eventId, setEventId] = useState('');
   const [type, setType] = useState('announcement');
@@ -31,14 +33,14 @@ export default function AdminLiveUpdatesPage() {
     setLoading(true);
     adminService.getLiveUpdates().then((res) => {
       if (res.success && res.data) setUpdates(res.data);
-    }).finally(() => setLoading(false));
+    }).catch(() => setFetchError('Failed to load live updates.')).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchUpdates(); }, []);
   useEffect(() => {
     eventService.getAll().then((res) => {
       if (res.success && res.data) setEvents(res.data);
-    });
+    }).catch(() => setFetchError('Failed to load events.')).finally(() => setEventsLoading(false));
   }, []);
 
   const handleCreate = async (e: FormEvent) => {
@@ -119,10 +121,14 @@ export default function AdminLiveUpdatesPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="alu-grid">
                 <div>
-                  <Select label="Event" value={eventId} onChange={setEventId}
-                    placeholder="Select an event"
-                    options={events.map((ev) => ({ value: ev.id, label: ev.title }))}
-                  />
+                  {eventsLoading ? (
+                    <div style={{ padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 13, color: 'var(--text-muted)', background: 'var(--bg)' }}>Loading events…</div>
+                  ) : (
+                    <Select label="Event" value={eventId} onChange={setEventId}
+                      placeholder="Select an event"
+                      options={events.map((ev) => ({ value: ev.id, label: ev.title }))}
+                    />
+                  )}
                 </div>
                 <div>
                   <Select label="Type" value={type} onChange={setType}

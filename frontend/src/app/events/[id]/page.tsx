@@ -36,6 +36,10 @@ export default function EventDetailPage() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+  const [liveUpdatesLoading, setLiveUpdatesLoading] = useState(true);
+  const [announcementsError, setAnnouncementsError] = useState<string | null>(null);
+  const [liveUpdatesError, setLiveUpdatesError] = useState<string | null>(null);
 
   useEffect(() => {
     eventService
@@ -44,12 +48,16 @@ export default function EventDetailPage() {
         if (res.success && res.data) setEvent(res.data);
       })
       .finally(() => setLoading(false));
+    setAnnouncementsLoading(true);
+    setAnnouncementsError(null);
     announcementService.getByEvent(id).then((res) => {
       if (res.success && res.data) setAnnouncements(res.data);
-    });
+    }).catch(() => setAnnouncementsError('Failed to load announcements')).finally(() => setAnnouncementsLoading(false));
+    setLiveUpdatesLoading(true);
+    setLiveUpdatesError(null);
     liveUpdateService.getByEvent(id).then((res) => {
       if (res.success && res.data) setLiveUpdates(res.data);
-    });
+    }).catch(() => setLiveUpdatesError('Failed to load live updates')).finally(() => setLiveUpdatesLoading(false));
   }, [id]);
 
   const handleRegister = async () => {
@@ -239,11 +247,23 @@ export default function EventDetailPage() {
               {event.description}
             </p>
 
-            {announcements.length > 0 && (
-              <div style={{ marginTop: 48 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 20 }}>
-                  Announcements
-                </h2>
+            <div style={{ marginTop: 48 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 20 }}>
+                Announcements
+              </h2>
+              {announcementsLoading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {[1, 2].map((i) => (
+                    <div key={i} style={{ height: 80, borderRadius: 'var(--radius-md)', background: 'var(--gray-100)', animation: 'shimmer 2s infinite linear', backgroundImage: 'linear-gradient(90deg, var(--gray-100) 0%, var(--gray-200) 40%, var(--gray-100) 80%)', backgroundSize: '200% 100%' }} />
+                  ))}
+                </div>
+              ) : announcementsError ? (
+                <div style={{ padding: '12px 18px', borderRadius: 'var(--radius-md)', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: 13 }}>
+                  {announcementsError}
+                </div>
+              ) : announcements.length === 0 ? (
+                <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>No announcements yet.</p>
+              ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {announcements.map((a) => (
                     <div
@@ -287,14 +307,26 @@ export default function EventDetailPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {liveUpdates.length > 0 && (
-              <div style={{ marginTop: 48 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 20 }}>
-                  Live updates
-                </h2>
+            <div style={{ marginTop: 48 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 20 }}>
+                Live updates
+              </h2>
+              {liveUpdatesLoading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[1, 2].map((i) => (
+                    <div key={i} style={{ height: 60, borderRadius: 'var(--radius-md)', background: 'var(--gray-100)', animation: 'shimmer 2s infinite linear', backgroundImage: 'linear-gradient(90deg, var(--gray-100) 0%, var(--gray-200) 40%, var(--gray-100) 80%)', backgroundSize: '200% 100%' }} />
+                  ))}
+                </div>
+              ) : liveUpdatesError ? (
+                <div style={{ padding: '12px 18px', borderRadius: 'var(--radius-md)', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: 13 }}>
+                  {liveUpdatesError}
+                </div>
+              ) : liveUpdates.length === 0 ? (
+                <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>No live updates yet.</p>
+              ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {liveUpdates.map((u) => (
                     <div
@@ -336,8 +368,8 @@ export default function EventDetailPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </motion.div>
 
           {/* Right - Sidebar */}

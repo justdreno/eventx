@@ -10,10 +10,12 @@ import type { AdminRegistration, Event } from '@/types';
 export default function AdminRegistrationsPage() {
   const [registrations, setRegistrations] = useState<AdminRegistration[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [eventFilter, setEventFilter] = useState('all');
   const [checkedFilter, setCheckedFilter] = useState('all');
   const [checkingIn, setCheckingIn] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchRegistrations = () => {
     setLoading(true);
@@ -22,7 +24,7 @@ export default function AdminRegistrationsPage() {
     if (checkedFilter !== 'all') params.checkedIn = checkedFilter;
     adminService.getRegistrations(params).then((res) => {
       if (res.success && res.data) setRegistrations(res.data);
-    }).finally(() => setLoading(false));
+    }).catch(() => setFetchError('Failed to load registrations.')).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchRegistrations(); }, [eventFilter, checkedFilter]);
@@ -30,7 +32,7 @@ export default function AdminRegistrationsPage() {
   useEffect(() => {
     eventService.getAll().then((res) => {
       if (res.success && res.data) setEvents(res.data);
-    });
+    }).catch(() => setFetchError('Failed to load events.')).finally(() => setEventsLoading(false));
   }, []);
 
   const handleCheckIn = async (id: string) => {
@@ -41,7 +43,7 @@ export default function AdminRegistrationsPage() {
         prev.map((r) => r.id === id ? { ...r, checkedIn: true, checkedInAt: new Date().toISOString() } : r)
       );
     } catch (err) {
-      alert((err as Error).message);
+      setFetchError('Failed to check in attendee.');
     } finally {
       setCheckingIn(null);
     }
@@ -60,15 +62,19 @@ export default function AdminRegistrationsPage() {
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ width: 220 }}>
-                <Select
-                  value={eventFilter}
-                  onChange={setEventFilter}
-                  placeholder="All events"
-                  options={[
-                    { value: 'all', label: 'All events' },
-                    ...events.map((ev) => ({ value: ev.id, label: ev.title })),
-                  ]}
-                />
+                {eventsLoading ? (
+                  <div style={{ padding: '9px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 13, color: 'var(--text-muted)', background: 'var(--bg)' }}>Loading events…</div>
+                ) : (
+                  <Select
+                    value={eventFilter}
+                    onChange={setEventFilter}
+                    placeholder="All events"
+                    options={[
+                      { value: 'all', label: 'All events' },
+                      ...events.map((ev) => ({ value: ev.id, label: ev.title })),
+                    ]}
+                  />
+                )}
               </div>
               <div style={{ width: 160 }}>
                 <Select

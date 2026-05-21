@@ -93,6 +93,7 @@ export default function AdminPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   const isAdmin = user?.role === 'admin' || user?.role === 'teacher';
 
@@ -104,7 +105,7 @@ export default function AdminPage() {
     }
     adminService.getStats().then((res) => {
       if (res.success && res.data) setStats(res.data);
-    }).finally(() => setLoading(false));
+    }).catch(() => setStatsError('Failed to load dashboard data.')).finally(() => setLoading(false));
   }, [isAuthenticated, isAdmin, authLoading, router]);
 
   if (authLoading || loading) {
@@ -149,6 +150,11 @@ export default function AdminPage() {
 
       <section style={{ padding: '48px 32px 80px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+          {statsError && (
+            <div style={{ padding: '14px 18px', borderRadius: 'var(--radius-md)', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
+              {statsError}
+            </div>
+          )}
           {/* Stats grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 48 }}>
               {statCards.map((card, i) => (

@@ -15,6 +15,8 @@ export default function LoginPage() {
     e.preventDefault();
     setFormError(null);
     if (!email.trim()) { setFormError('Email is required'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { setFormError('Please enter a valid email address.'); return; }
     if (!password) { setFormError('Password is required'); return; }
     try {
       await login(email, password);
