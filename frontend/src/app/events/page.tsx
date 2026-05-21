@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Select from '@/components/ui/select';
 import { eventService } from '@/services';
 import type { Event } from '@/types';
 
@@ -168,28 +169,19 @@ export default function EventsPage() {
           </div>
 
           {/* Status filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: '9px 14px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border)',
-              fontSize: 13,
-              background: 'var(--bg)',
-              color: 'var(--text)',
-              outline: 'none',
-              cursor: 'pointer',
-              transition: 'border-color 0.2s',
-            }}
-            className="ev-filter-input"
-          >
-            <option value="all">All statuses</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <div style={{ minWidth: 140, width: 160 }}>
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: 'all', label: 'All statuses' },
+                { value: 'upcoming', label: 'Upcoming' },
+                { value: 'ongoing', label: 'Ongoing' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'cancelled', label: 'Cancelled' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Select from '@/components/ui/select';
 import { announcementService, eventService } from '@/services';
 import type { Event, Announcement } from '@/types';
 
@@ -55,20 +56,9 @@ export default function CreateAnnouncementPage() {
 
   return (
     <div>
-      <section style={{ padding: '140px 32px 60px', borderBottom: '1px solid var(--border)', background: 'var(--gray-50)' }}>
+      <section style={{ padding: '48px 32px 60px', borderBottom: '1px solid var(--border)', background: 'var(--gray-50)' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <Link
-            href="/admin"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)', marginBottom: 24, transition: 'color 0.2s' }}
-            className="ca-back"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Back to dashboard
-          </Link>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <span style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 20, fontWeight: 500, background: 'var(--white)' }}>
-              Admin
-            </span>
             <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: 'var(--text)', marginBottom: 16 }}>
               Post announcement
             </h1>
@@ -143,16 +133,13 @@ export default function CreateAnnouncementPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Linked event (optional)</label>
-                <select value={eventId} onChange={(e) => setEventId(e.target.value)}
-                  style={{ width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none', cursor: 'pointer' }}
-                  className="ca-input"
-                >
-                  <option value="">No event</option>
-                  {events.map((ev) => (
-                    <option key={ev.id} value={ev.id}>{ev.title}</option>
-                  ))}
-                </select>
+                <Select label="Linked event (optional)" value={eventId} onChange={setEventId}
+                  placeholder="No event"
+                  options={[
+                    { value: '', label: 'No event' },
+                    ...events.map((ev) => ({ value: ev.id, label: ev.title })),
+                  ]}
+                />
               </div>
             </div>
 
@@ -180,7 +167,6 @@ export default function CreateAnnouncementPage() {
 
       <style>{`
         .ca-input:focus { border-color: var(--black) !important; }
-        .ca-back:hover { color: var(--text) !important; }
         .ca-cancel:hover { background: var(--gray-50) !important; border-color: var(--gray-400) !important; }
         .ca-prio:hover { border-color: var(--gray-400) !important; }
         @media (max-width: 600px) {

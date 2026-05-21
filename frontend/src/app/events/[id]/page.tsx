@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { eventService, registrationService, announcementService } from '@/services';
+import { eventService, registrationService, announcementService, liveUpdateService } from '@/services';
 import { useAuth } from '@/hooks';
-import type { Event, Registration, Announcement } from '@/types';
+import type { Event, Registration, Announcement, LiveUpdate } from '@/types';
 
 const statusColors: Record<string, string> = {
   upcoming: '#2563eb',
@@ -34,6 +34,7 @@ export default function EventDetailPage() {
   const [registration, setRegistration] = useState<Registration | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
 
   useEffect(() => {
     eventService
@@ -44,6 +45,9 @@ export default function EventDetailPage() {
       .finally(() => setLoading(false));
     announcementService.getByEvent(id).then((res) => {
       if (res.success && res.data) setAnnouncements(res.data);
+    });
+    liveUpdateService.getByEvent(id).then((res) => {
+      if (res.success && res.data) setLiveUpdates(res.data);
     });
   }, [id]);
 
@@ -137,26 +141,50 @@ export default function EventDetailPage() {
         }}
       >
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontSize: 28 }}>{typeIcons[event.type] || '📌'}</span>
-            <span
-              style={{
-                padding: '4px 12px',
-                borderRadius: 'var(--radius-full)',
-                background: statusColors[event.status],
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-                textTransform: 'capitalize',
-                letterSpacing: '0.02em',
-              }}
-            >
-              {event.status}
-            </span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>
-              {event.type}
-            </span>
-          </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
+              <span style={{ fontSize: 28 }}>{typeIcons[event.type] || '📌'}</span>
+              <span
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 'var(--radius-full)',
+                  background: statusColors[event.status],
+                  color: '#fff',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textTransform: 'capitalize',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {event.status}
+              </span>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>
+                {event.type}
+              </span>
+              {(user?.role === 'admin' || user?.role === 'teacher') && (
+                <Link
+                  href={`/admin/events/${event.id}/edit`}
+                  style={{
+                    marginLeft: 'auto',
+                    padding: '5px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    letterSpacing: '0.01em',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    transition: 'background 0.2s',
+                  }}
+                  className="ev-edit-btn"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Edit
+                </Link>
+              )}
+            </div>
           <h1
             style={{
               fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
@@ -243,6 +271,55 @@ export default function EventDetailPage() {
                       <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                         {a.content}
                       </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {liveUpdates.length > 0 && (
+              <div style={{ marginTop: 48 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 20 }}>
+                  Live updates
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {liveUpdates.map((u) => (
+                    <div
+                      key={u.id}
+                      style={{
+                        padding: '14px 18px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border)',
+                        background: 'var(--bg)',
+                        display: 'flex',
+                        gap: 12,
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        background: u.type === 'score' ? '#16a34a' : u.type === 'highlight' ? '#2563eb' : u.type === 'photo' ? '#ea580c' : '#6b7280',
+                        color: '#fff',
+                        fontSize: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}>
+                        {u.type === 'score' ? '🏆' : u.type === 'highlight' ? '⭐' : u.type === 'photo' ? '📷' : '📢'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize', fontWeight: 500 }}>{u.type}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            {new Date(u.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{u.content}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -409,6 +486,9 @@ export default function EventDetailPage() {
       <style>{`
         .ev-back:hover {
           color: var(--text) !important;
+        }
+        .ev-edit-btn:hover {
+          background: rgba(255,255,255,0.22) !important;
         }
         @media (max-width: 768px) {
           .ev-detail-grid {

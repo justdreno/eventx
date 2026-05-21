@@ -9,8 +9,9 @@ import { PageTransition } from '@/components/ui/page-transition';
 export default function AuthAwareLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/register';
+  const isAdminPage = pathname.startsWith('/admin');
 
-  if (isAuthPage) {
+  if (isAuthPage || isAdminPage) {
     return <>{children}</>;
   }
 

@@ -8,8 +8,6 @@ import { useAuth } from '@/hooks';
 const navLinks = [
   { label: 'Events', href: '/events' },
   { label: 'Announcements', href: '/announcements' },
-  { label: 'Features', href: '#features' },
-  { label: 'How It Works', href: '#phases' },
 ];
 
 export function Header() {

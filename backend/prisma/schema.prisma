@@ -17,6 +17,7 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   registrations Registration[]
+  events       Event[]
 }
 
 model Event {
@@ -32,8 +33,10 @@ model Event {
   createdBy     String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  createdByUser User           @relation(fields: [createdBy], references: [id])
   registrations Registration[]
   announcements Announcement[]
+  liveUpdates    LiveUpdate[]
 }
 
 model Registration {
@@ -59,4 +62,14 @@ model Announcement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   event     Event?   @relation(fields: [eventId], references: [id])
+}
+
+model LiveUpdate {
+  id        String   @id @default(cuid())
+  eventId   String
+  type      String   @default("announcement")
+  content   String
+  mediaUrl  String?
+  timestamp DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
 }

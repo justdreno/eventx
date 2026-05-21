@@ -64,6 +64,30 @@ export class RegistrationController {
     }
   }
 
+  async checkInByQr(req: AuthRequest, res: Response, _next: NextFunction) {
+    try {
+      const qrCode = req.params.qrCode as string;
+      const registration = await prisma.registration.findUnique({ where: { qrCode } });
+      if (!registration) {
+        return sendError(res, 'Invalid QR code — no registration found', 404);
+      }
+      if (registration.checkedIn) {
+        return sendError(res, 'Already checked in', 409);
+      }
+      const updated = await prisma.registration.update({
+        where: { id: registration.id },
+        data: { checkedIn: true, checkedInAt: new Date() },
+        include: {
+          event: { select: { id: true, title: true, venue: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+      return sendSuccess(res, updated, 'Check-in successful');
+    } catch (err) {
+      return sendError(res, (err as Error).message);
+    }
+  }
+
   async checkIn(req: AuthRequest, res: Response, _next: NextFunction) {
     try {
       const id = req.params.id as string;

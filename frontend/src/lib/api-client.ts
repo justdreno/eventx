@@ -2,6 +2,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 
 interface RequestOptions {
   headers?: Record<string, string>;
+  params?: Record<string, string>;
   cache?: RequestCache;
   next?: { revalidate?: number; tags?: string[] };
 }
@@ -26,6 +27,12 @@ class ApiClient {
   ): Promise<T> {
     const token = this.getToken();
 
+    let url = `${this.baseUrl}${endpoint}`;
+    if (options?.params) {
+      const qs = new URLSearchParams(options.params).toString();
+      if (qs) url += `?${qs}`;
+    }
+
     const config: RequestInit = {
       method,
       headers: {
@@ -41,7 +48,7 @@ class ApiClient {
       config.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+    const response = await fetch(url, config);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: response.statusText }));

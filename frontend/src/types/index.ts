@@ -75,6 +75,7 @@ export interface AdminStats {
     users: number;
     registrations: number;
     announcements: number;
+    liveUpdates: number;
   };
   eventsByStatus: { status: string; _count: { id: number } }[];
   recentRegistrations: (Registration & { user: { id: string; name: string; email: string } })[];
@@ -82,6 +83,28 @@ export interface AdminStats {
 
 export interface RegistrationWithUser extends Registration {
   user: { id: string; name: string; email: string };
+}
+
+export interface AdminRegistration extends Registration {
+  user: { id: string; name: string; email: string };
+}
+
+export interface AdminLiveUpdate extends LiveUpdate {
+  event: { id: string; title: string };
+}
+
+export interface AdminEvent extends Event {
+  _count: { registrations: number };
+  createdByUser: { id: string; name: string };
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  _count: { registrations: number; events: number };
 }
 
 export type ApiResponse<T> = {

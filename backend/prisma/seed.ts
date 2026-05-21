@@ -105,6 +105,11 @@ async function main() {
     },
   ];
 
+  await prisma.liveUpdate.deleteMany();
+  await prisma.announcement.deleteMany();
+  await prisma.registration.deleteMany();
+  await prisma.event.deleteMany();
+
   const createdEvents: { id: string; title: string }[] = [];
   for (const event of events) {
     const created = await prisma.event.create({ data: event });
@@ -128,6 +133,18 @@ async function main() {
     await prisma.announcement.create({ data: a });
   }
 
+  const now = new Date();
+  const liveUpdates = [
+    { eventId: sportsEvent!.id, type: 'announcement', content: 'The 100m heats have been rescheduled to 11 AM.', timestamp: new Date(now.getTime() - 3600000) },
+    { eventId: sportsEvent!.id, type: 'score', content: 'Blue House leads the points table with 245 points.', timestamp: new Date(now.getTime() - 1800000) },
+    { eventId: scienceEvent!.id, type: 'highlight', content: 'Team Alpha just demoed a working Mars rover prototype. Judges are impressed!', timestamp: new Date(now.getTime() - 7200000) },
+    { eventId: culturalEvent!.id, type: 'photo', content: 'Check out the backstage preparations for the grand finale!', timestamp: new Date(now.getTime() - 86400000) },
+  ];
+
+  for (const u of liveUpdates) {
+    await prisma.liveUpdate.create({ data: u });
+  }
+
   console.log('Seeded users:');
   console.log(`  Admin:   admin@eventx.dev / password123`);
   console.log(`  Teacher: teacher@eventx.dev / password123`);
@@ -135,6 +152,7 @@ async function main() {
   console.log('');
   console.log(`Seeded ${events.length} events`);
   console.log(`Seeded ${announcements.length} announcements`);
+  console.log(`Seeded ${liveUpdates.length} live updates`);
 }
 
 main()
