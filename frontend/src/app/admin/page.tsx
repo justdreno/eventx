@@ -205,7 +205,7 @@ export default function AdminPage() {
                   </h3>
                   <BarChart
                     data={chartData.registrationsOverTime.map((d) => ({ label: d.month, value: d.count, color: '#2563eb' }))}
-                    height={180}
+                    height={240}
                   />
                 </motion.div>
               )}
@@ -221,7 +221,6 @@ export default function AdminPage() {
                   </h3>
                   <HorizontalBar
                     data={chartData.eventsByType.map((d) => ({ label: d.type, value: d.count, color: '#7c3aed' }))}
-                    height={chartData.eventsByType.length * 32 + 16}
                   />
                 </motion.div>
               )}
@@ -237,7 +236,6 @@ export default function AdminPage() {
                   </h3>
                   <HorizontalBar
                     data={chartData.registrationsByEvent.map((d) => ({ label: d.title, value: d.count, color: '#16a34a' }))}
-                    height={Math.min(chartData.registrationsByEvent.length, 8) * 32 + 16}
                   />
                 </motion.div>
               )}

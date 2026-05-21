@@ -1,42 +1,48 @@
 'use client';
 
-interface BarChartProps {
-  data: { label: string; value: number; color?: string }[];
-  height?: number;
-  maxBarWidth?: number;
+interface ChartItem {
+  label: string;
+  value: number;
+  color?: string;
 }
 
-export function BarChart({ data, height = 200, maxBarWidth = 40 }: BarChartProps) {
+export function BarChart({ data, height = 240 }: { data: ChartItem[]; height?: number }) {
   const max = Math.max(...data.map((d) => d.value), 1);
-  const padL = 28;
-  const padR = 12;
-  const w = Math.max(data.length * (maxBarWidth + 16) + padL + padR, 300);
-  const barW = maxBarWidth;
+  const barCount = data.length;
+  const barW = Math.min(48, Math.max(32, (700 - 80) / barCount - 16));
+  const padL = 40;
+  const padR = 16;
+  const padB = 32;
+  const padT = 24;
+  const chartW = barCount * (barW + 12) + padL + padR;
 
   return (
-    <svg width="100%" height={height} viewBox={`0 0 ${w} ${height}`} style={{ display: 'block', overflow: 'visible' }}>
+    <svg width="100%" height={height} viewBox={`0 0 ${Math.max(chartW, 320)} ${height}`} style={{ display: 'block' }}>
       {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
-        const y = height - 20 - (height - 28) * frac;
+        const y = padT + (height - padT - padB) * (1 - frac);
         return (
           <g key={frac}>
-            <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="var(--border)" strokeWidth="1" />
-            <text x={padL - 6} y={y + 4} textAnchor="end" fill="var(--text-muted)" fontSize="10">
-              {Math.round(max * frac)}
-            </text>
+            <line x1={padL} y1={y} x2={Math.max(chartW, 320) - padR} y2={y} stroke="var(--border)" strokeWidth="1" />
+            <text x={padL - 8} y={y + 4} textAnchor="end" fill="var(--text-muted)" fontSize="12">{Math.round(max * frac)}</text>
           </g>
         );
       })}
       {data.map((d, i) => {
-        const x = padL + i * (barW + 16) + 8;
-        const barH = ((d.value / max) * (height - 28));
-        const y = height - 20 - barH;
+        const x = padL + i * (barW + 12) + 6;
+        const barH = Math.max((d.value / max) * (height - padT - padB), 2);
+        const y = height - padB - barH;
         return (
           <g key={d.label}>
-            <rect x={x} y={y} width={barW} height={barH} rx="3" fill={d.color || 'var(--gray-400)'} opacity="0.85">
+            {d.value > 0 && (
+              <text x={x + barW / 2} y={y - 6} textAnchor="middle" fill="var(--text)" fontSize="13" fontWeight="700">
+                {d.value}
+              </text>
+            )}
+            <rect x={x} y={y} width={barW} height={barH} rx="4" fill={d.color || 'var(--gray-400)'}>
               <title>{d.label}: {d.value}</title>
             </rect>
-            <text x={x + barW / 2} y={height - 4} textAnchor="end" fill="var(--text-muted)" fontSize="9" transform={`rotate(-40, ${x + barW / 2}, ${height - 4})`}>
-              {d.label.length > 8 ? d.label.slice(0, 7) + '…' : d.label}
+            <text x={x + barW / 2} y={height - 6} textAnchor="middle" fill="var(--text-secondary)" fontSize="12" fontWeight="500">
+              {d.label}
             </text>
           </g>
         );
@@ -45,27 +51,23 @@ export function BarChart({ data, height = 200, maxBarWidth = 40 }: BarChartProps
   );
 }
 
-export function HorizontalBar({ data, height: h = 200 }: { data: { label: string; value: number; color?: string }[]; height?: number }) {
+export function HorizontalBar({ data }: { data: ChartItem[] }) {
   const max = Math.max(...data.map((d) => d.value), 1);
-  const rowH = Math.max(Math.min(28, (h - 16) / data.length), 20);
-  const innerH = data.length * rowH + 16;
+  const rowH = 36;
+  const innerH = data.length * rowH + 12;
 
   return (
-    <svg width="100%" height={Math.max(innerH, 60)} viewBox={`0 0 400 ${Math.max(innerH, 60)}`} style={{ display: 'block', overflow: 'visible' }}>
+    <svg width="100%" height={Math.max(innerH, 80)} viewBox={`0 0 500 ${Math.max(innerH, 80)}`} style={{ display: 'block' }}>
       {data.map((d, i) => {
-        const barW = (d.value / max) * 260;
+        const barW = Math.max((d.value / max) * 300, d.value > 0 ? 20 : 0);
         const y = 8 + i * rowH;
         return (
           <g key={d.label}>
-            <rect x="110" y={y} width={barW} height={rowH - 6} rx="3" fill={d.color || 'var(--gray-400)'} opacity="0.85">
+            <rect x="140" y={y} width={barW} height={24} rx="4" fill={d.color || 'var(--gray-400)'}>
               <title>{d.label}: {d.value}</title>
             </rect>
-            <text x="104" y={y + (rowH - 6) / 2 + 4} textAnchor="end" fill="var(--text)" fontSize="11" fontWeight="500">
-              {d.label.length > 16 ? d.label.slice(0, 15) + '…' : d.label}
-            </text>
-            <text x={110 + barW + 8} y={y + (rowH - 6) / 2 + 4} fill="var(--text-muted)" fontSize="11" fontWeight="600">
-              {d.value}
-            </text>
+            <text x="132" y={y + 17} textAnchor="end" fill="var(--text)" fontSize="13" fontWeight="500">{d.label}</text>
+            <text x={140 + barW + 10} y={y + 17} fill="var(--text)" fontSize="13" fontWeight="700">{d.value}</text>
           </g>
         );
       })}
