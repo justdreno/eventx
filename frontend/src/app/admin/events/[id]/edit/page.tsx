@@ -22,6 +22,9 @@ export default function EditEventPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [status, setStatus] = useState<Event['status']>('upcoming');
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     eventService.getById(id).then((res) => {
@@ -34,9 +37,21 @@ export default function EditEventPage() {
         setStartDate(new Date(e.startDate).toISOString().slice(0, 16));
         setEndDate(new Date(e.endDate).toISOString().slice(0, 16));
         setStatus(e.status);
+        if (e.coverImage) {
+          setCoverImageUrl(e.coverImage);
+          setImagePreview(e.coverImage);
+        }
       }
     }).catch(() => setError('Failed to load event details.')).finally(() => setLoading(false));
   }, [id]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,6 +63,11 @@ export default function EditEventPage() {
     if (new Date(endDate) <= new Date(startDate)) { setError('End date must be after start date'); return; }
     setSubmitting(true);
     try {
+      let coverImage = coverImageUrl;
+      if (imageFile) {
+        const url = await eventService.uploadImage(imageFile);
+        if (url) coverImage = url;
+      }
       const res = await eventService.update(id, {
         title: title.trim(),
         description: description.trim(),
@@ -56,6 +76,7 @@ export default function EditEventPage() {
         startDate: new Date(startDate).toISOString(),
         endDate: new Date(endDate).toISOString(),
         status,
+        coverImage,
       } as any);
       if (res.success) {
         router.push(`/events/${id}`);
@@ -132,6 +153,42 @@ export default function EditEventPage() {
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none', transition: 'border-color 0.2s', resize: 'vertical', fontFamily: 'inherit' }}
                   className="ee-input"
                 />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Cover image</label>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <label
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 'var(--radius-full)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg)',
+                      color: 'var(--text)',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    className="ee-upload-btn"
+                  >
+                    {imagePreview ? 'Change image' : 'Choose image'}
+                    <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                  </label>
+                  {imagePreview && (
+                    <div style={{ position: 'relative', width: 100, height: 64, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button
+                        type="button"
+                        onClick={() => { setImageFile(null); setImagePreview(null); setCoverImageUrl(null); }}
+                        style={{ position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  {!imagePreview && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Optional. Upload a cover photo for the event.</span>}
+                </div>
               </div>
 
               <div>
@@ -225,6 +282,7 @@ export default function EditEventPage() {
         .ee-input:focus { border-color: var(--black) !important; }
         .ee-cancel:hover { background: var(--gray-50) !important; border-color: var(--gray-400) !important; }
         .ee-delete:hover { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+        .ee-upload-btn:hover { background: var(--gray-50) !important; border-color: var(--gray-400) !important; }
         @media (max-width: 600px) {
           .ee-grid { grid-template-columns: 1fr !important; }
         }

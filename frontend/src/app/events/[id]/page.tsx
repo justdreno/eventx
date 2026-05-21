@@ -142,8 +142,10 @@ export default function EventDetailPage() {
           borderRadius: 'var(--radius-xl)',
           overflow: 'hidden',
           position: 'relative',
-          minHeight: 320,
-          background: `linear-gradient(135deg, var(--gray-900) 0%, var(--gray-700) 100%)`,
+          minHeight: 360,
+          background: event.coverImage
+            ? `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)), url(${event.coverImage}) center/cover no-repeat`
+            : `linear-gradient(135deg, var(--gray-900) 0%, var(--gray-700) 100%)`,
           display: 'flex',
           alignItems: 'flex-end',
           padding: 48,

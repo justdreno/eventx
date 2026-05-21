@@ -5,6 +5,7 @@ import announcementRoutes from './announcement.routes';
 import registrationRoutes from './registration.routes';
 import liveUpdateRoutes from './live-update.routes';
 import adminRoutes from './admin.routes';
+import uploadRoutes from './upload.routes';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/announcements', announcementRoutes);
 router.use('/registrations', registrationRoutes);
 router.use('/live-updates', liveUpdateRoutes);
 router.use('/admin', adminRoutes);
+router.use('/upload', uploadRoutes);
 
 export default router;

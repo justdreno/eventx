@@ -33,6 +33,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Uploaded images
+uploads/
+
 # Archives
 *.zip
 *.tar.gz

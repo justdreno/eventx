@@ -248,16 +248,16 @@ export default function EventsPage() {
                     >
                       <div
                         style={{
-                          height: 140,
-                          background: `linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`,
+                          height: 160,
+                          background: event.coverImage ? `url(${event.coverImage}) center/cover no-repeat` : 'var(--gray-50)',
                           display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          alignItems: event.coverImage ? 'flex-end' : 'center',
+                          justifyContent: event.coverImage ? 'flex-start' : 'center',
                           fontSize: 40,
                           position: 'relative',
                         }}
                       >
-                        {typeIcons[event.type] || '📌'}
+                        {!event.coverImage && (typeIcons[event.type] || '📌')}
                         <span
                           style={{
                             position: 'absolute',

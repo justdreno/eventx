@@ -20,6 +20,17 @@ export default function CreateEventPage() {
   const [endDate, setEndDate] = useState('');
   const [status, setStatus] = useState<Event['status']>('upcoming');
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -33,6 +44,11 @@ export default function CreateEventPage() {
 
     setSubmitting(true);
     try {
+      let coverImage: string | undefined;
+      if (imageFile) {
+        const url = await eventService.uploadImage(imageFile);
+        if (url) coverImage = url;
+      }
       const res = await eventService.create({
         title: title.trim(),
         description: description.trim(),
@@ -41,6 +57,7 @@ export default function CreateEventPage() {
         startDate: new Date(startDate).toISOString(),
         endDate: new Date(endDate).toISOString(),
         status,
+        coverImage,
       });
       if (res.success && res.data) {
         router.push(`/events/${res.data.id}`);
@@ -99,6 +116,42 @@ export default function CreateEventPage() {
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none', transition: 'border-color 0.2s', resize: 'vertical', fontFamily: 'inherit' }}
                   className="ce-input"
                 />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Cover image</label>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <label
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 'var(--radius-full)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg)',
+                      color: 'var(--text)',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    className="ce-upload-btn"
+                  >
+                    Choose image
+                    <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                  </label>
+                  {imagePreview && (
+                    <div style={{ position: 'relative', width: 100, height: 64, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button
+                        type="button"
+                        onClick={() => { setImageFile(null); setImagePreview(null); }}
+                        style={{ position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  {!imagePreview && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Optional. Upload a cover photo for the event.</span>}
+                </div>
               </div>
 
               <div>
@@ -177,6 +230,7 @@ export default function CreateEventPage() {
       <style>{`
         .ce-input:focus { border-color: var(--black) !important; }
         .ce-cancel:hover { background: var(--gray-50) !important; border-color: var(--gray-400) !important; }
+        .ce-upload-btn:hover { background: var(--gray-50) !important; border-color: var(--gray-400) !important; }
         @media (max-width: 600px) {
           .ce-grid { grid-template-columns: 1fr !important; }
         }
