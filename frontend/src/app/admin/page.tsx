@@ -205,7 +205,6 @@ export default function AdminPage() {
                   </h3>
                   <BarChart
                     data={chartData.registrationsOverTime.map((d) => ({ label: d.month, value: d.count, color: '#2563eb' }))}
-                    height={240}
                   />
                 </motion.div>
               )}
