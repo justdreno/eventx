@@ -209,7 +209,7 @@ export default function EventDetailPage() {
             </span>
           </div>
           {event.status === 'upcoming' && (
-            <div style={{ marginTop: 24, display: 'inline-block', padding: '14px 20px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
+            <div style={{ marginTop: 24, display: 'inline-block', padding: '14px 20px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', color: '#fff' }}>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Countdown</div>
               <Countdown targetDate={event.startDate} size="md" />
             </div>
@@ -455,6 +455,31 @@ export default function EventDetailPage() {
                     </span>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.share) {
+                      navigator.share({ title: event.title, url: window.location.href });
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                    }
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', width: '100%',
+                    padding: '10px 0',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1px solid var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text)',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    marginTop: 16,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>
+                  Share event
+                </button>
 
                 {registerError && (
                   <p style={{ fontSize: 13, color: '#991b1b', marginTop: 16, textAlign: 'center' }}>
