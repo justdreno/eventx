@@ -28,7 +28,7 @@ const quickActions = [
   },
   {
     label: 'Post Announcement',
-    href: '#',
+    href: '/admin/announcements/new',
     desc: 'Send an update to everyone',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
