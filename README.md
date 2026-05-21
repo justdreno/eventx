@@ -8,15 +8,86 @@ Built with **Next.js 16**, **Express 5**, **Prisma**, **SQLite**, and **framer-m
 
 ## Architecture
 
-![Architecture](https://mermaid.ink/img/Z3JhcGggVEIKICAgIHN1YmdyYXBoIEJyb3dzZXJbQnJvd3Nlcl0KICAgICAgICBMW0xhbmRpbmcgUGFnZV0KICAgICAgICBFW0V2ZW50cyBCcm93c2VdCiAgICAgICAgUltNeSBSZWdpc3RyYXRpb25zXQogICAgICAgIEFbQW5ub3VuY2VtZW50c10KICAgICAgICBDW0NhbGVuZGFyXQogICAgZW5kCiAgICBzdWJncmFwaCBOZXh0W05leHQuanMgQXBwIFJvdXRlcl0KICAgICAgICBBQ1tBUEkgQ2xpZW50XQogICAgICAgIEpXVFtBdXRoIEpXVF0KICAgIGVuZAogICAgc3ViZ3JhcGggRXhwcmVzc1tFeHByZXNzIEFQSSBTZXJ2ZXJdCiAgICAgICAgQXV0aFJbQXV0aCBSb3V0ZXNdCiAgICAgICAgRXZlbnRSW0V2ZW50IFJvdXRlc10KICAgICAgICBSZWdSW1JlZ2lzdHJhdGlvbiBSb3V0ZXNdCiAgICAgICAgQW5uUltBbm5vdW5jZW1lbnQgUm91dGVzXQogICAgICAgIExpdmVSW0xpdmUgVXBkYXRlIFJvdXRlc10KICAgICAgICBBZG1pblJbQWRtaW4gUm91dGVzXQogICAgZW5kCiAgICBEQlsoU1FMaXRlIERhdGFiYXNlKV0KICAgIEwgLS0+IEFDCiAgICBFIC0tPiBBQwogICAgUiAtLT4gQUMKICAgIEEgLS0+IEFDCiAgICBDIC0tPiBBQwogICAgQUMgLS0+IEV4cHJlc3MKICAgIEpXVCAtLT4gRXhwcmVzcwogICAgQXV0aFIgLS0+IERCCiAgICBFdmVudFIgLS0+IERCCiAgICBSZWdSIC0tPiBEQgogICAgQW5uUiAtLT4gREIKICAgIExpdmVSIC0tPiBEQgogICAgQWRtaW5SIC0tPiBEQgo=)
+```mermaid
+graph TB
+    subgraph Browser[Browser]
+        L[Landing Page]
+        E[Events Browse]
+        R[My Registrations]
+        A[Announcements]
+        C[Calendar]
+    end
+    subgraph Next[Next.js App Router]
+        AC[API Client]
+        JWT[Auth JWT]
+    end
+    subgraph Express[Express API Server]
+        AuthR[Auth Routes]
+        EventR[Event Routes]
+        RegR[Registration Routes]
+        AnnR[Announcement Routes]
+        LiveR[Live Update Routes]
+        AdminR[Admin Routes]
+    end
+    DB[(SQLite Database)]
+    L --> AC
+    E --> AC
+    R --> AC
+    A --> AC
+    C --> AC
+    AC --> Express
+    JWT --> Express
+    AuthR --> DB
+    EventR --> DB
+    RegR --> DB
+    AnnR --> DB
+    LiveR --> DB
+    AdminR --> DB
+```
 
 ### Data Flow — Auth
 
-![Auth Flow](https://mermaid.ink/img/c2VxdWVuY2VEaWFncmFtCiAgICBwYXJ0aWNpcGFudCBVIGFzIFVzZXIKICAgIHBhcnRpY2lwYW50IEZFIGFzIEZyb250ZW5kCiAgICBwYXJ0aWNpcGFudCBCRSBhcyBCYWNrZW5kCiAgICBwYXJ0aWNpcGFudCBEQiBhcyBTUUxpdGUKICAgIFUtPj5GRTogUmVnaXN0ZXIgLyBMb2dpbgogICAgRkUtPj5CRTogUE9TVCAvYXV0aC9yZWdpc3RlciBvciAvYXV0aC9sb2dpbgogICAgQkUtPj5CRTogYmNyeXB0IGhhc2ggLyBjb21wYXJlCiAgICBCRS0+PkRCOiBDcmVhdGUgLyBGaW5kIHVzZXIKICAgIERCLS0+PkJFOiBVc2VyIGRhdGEKICAgIEJFLT4+QkU6IGp3dC5zaWduKHVzZXJJZCwgcm9sZSkKICAgIEJFLS0+PkZFOiB7IHVzZXIsIHRva2VuIH0KICAgIEZFLT4+RkU6IFN0b3JlIGluIGxvY2FsU3RvcmFnZQogICAgRkUtPj5GRTogUmVkaXJlY3QgdG8gL2V2ZW50cw0K)
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as SQLite
+    U->>FE: Register / Login
+    FE->>BE: POST /auth/register or /auth/login
+    BE->>BE: bcrypt hash / compare
+    BE->>DB: Create / Find user
+    DB-->>BE: User data
+    BE->>BE: jwt.sign(userId, role)
+    BE-->>FE: { user, token }
+    FE->>FE: Store in localStorage
+    FE->>FE: Redirect to /events
+```
 
 ### Data Flow — Registration
 
-![Registration Flow](https://mermaid.ink/img/c2VxdWVuY2VEaWFncmFtCiAgICBwYXJ0aWNpcGFudCBTIGFzIFN0dWRlbnQKICAgIHBhcnRpY2lwYW50IEZFIGFzIEZyb250ZW5kCiAgICBwYXJ0aWNpcGFudCBCRSBhcyBCYWNrZW5kCiAgICBwYXJ0aWNpcGFudCBEQiBhcyBTUUxpdGUKICAgIFMtPj5GRTogQ2xpY2sgUmVnaXN0ZXIKICAgIEZFLT4+QkU6IFBPU1QgL3JlZ2lzdHJhdGlvbnMgKEpXVCkKICAgIEJFLT4+REI6IENoZWNrIGV2ZW50IGV4aXN0cwogICAgQkUtPj5EQjogQ2hlY2sgbm90IGR1cGxpY2F0ZQogICAgQkUtPj5CRTogY3J5cHRvLnJhbmRvbVVVSUQoKQogICAgTm90ZSBvdmVyIEJFOiBHZW5lcmF0ZXMgdW5pcXVlIFFSIGNvZGUKICAgIEJFLT4+REI6IElOU0VSVCByZWdpc3RyYXRpb24KICAgIERCLS0+PkJFOiBSZWdpc3RyYXRpb24KICAgIEJFLS0+PkZFOiB7IHFyQ29kZSwgZXZlbnQgfQogICAgRkUtPj5GRTogUmVuZGVyIFFSIHZpYSBhcGkucXJzZXJ2ZXIuY29tCiAgICBTLT4+UzogU2hvdyBRUiBhdCB2ZW51ZQogICAgRkUtPj5CRTogUFVUIC9yZWdpc3RyYXRpb25zLzppZC9jaGVja2luCiAgICBCRS0+PkRCOiBVUERBVEUgY2hlY2tlZEluPXRydWUKICAgIERCLS0+PkJFOiBTdWNjZXNzCiAgICBCRS0tPj5GRTogeyBjaGVja2VkSW46IHRydWUgfQ0K)
+```mermaid
+sequenceDiagram
+    participant S as Student
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as SQLite
+    S->>FE: Click Register
+    FE->>BE: POST /registrations (JWT)
+    BE->>DB: Check event exists
+    BE->>DB: Check not duplicate
+    BE->>BE: crypto.randomUUID()
+    Note over BE: Generates unique QR code
+    BE->>DB: INSERT registration
+    DB-->>BE: Registration
+    BE-->>FE: { qrCode, event }
+    FE->>FE: Render QR via api.qrserver.com
+    S->>S: Show QR at venue
+    FE->>BE: PUT /registrations/:id/checkin
+    BE->>DB: UPDATE checkedIn=true
+    DB-->>BE: Success
+    BE-->>FE: { checkedIn: true }
+```
 
 ---
 
@@ -37,7 +108,57 @@ Built with **Next.js 16**, **Express 5**, **Prisma**, **SQLite**, and **framer-m
 
 ## Database Schema
 
-![Schema](https://mermaid.ink/img/ZXJEaWFncmFtCiAgICBVc2VyIHx8LS1veyBSZWdpc3RyYXRpb24gOiBoYXMKICAgIEV2ZW50IHx8LS1veyBSZWdpc3RyYXRpb24gOiBoYXMKICAgIEV2ZW50IHx8LS1veyBBbm5vdW5jZW1lbnQgOiBoYXMKICAgIEV2ZW50IHx8LS1veyBMaXZlVXBkYXRlIDogaGFzCiAgICBVc2VyIHx8LS1veyBFdmVudCA6IGNyZWF0ZWQgYnkKICAgIFVzZXIgewogICAgICAgIHN0cmluZyBpZCBQSwogICAgICAgIHN0cmluZyBuYW1lCiAgICAgICAgc3RyaW5nIGVtYWlsIFVLCiAgICAgICAgc3RyaW5nIHBhc3N3b3JkCiAgICAgICAgc3RyaW5nIHJvbGUKICAgIH0KICAgIEV2ZW50IHsKICAgICAgICBzdHJpbmcgaWQgUEsKICAgICAgICBzdHJpbmcgdGl0bGUKICAgICAgICBzdHJpbmcgZGVzY3JpcHRpb24KICAgICAgICBzdHJpbmcgdHlwZQogICAgICAgIHN0cmluZyB2ZW51ZQogICAgICAgIGRhdGV0aW1lIHN0YXJ0RGF0ZQogICAgICAgIGRhdGV0aW1lIGVuZERhdGUKICAgICAgICBzdHJpbmcgY292ZXJJbWFnZQogICAgICAgIHN0cmluZyBzdGF0dXMKICAgICAgICBzdHJpbmcgY3JlYXRlZEJ5SUQgRksKICAgIH0KICAgIFJlZ2lzdHJhdGlvbiB7CiAgICAgICAgc3RyaW5nIGlkIFBLCiAgICAgICAgc3RyaW5nIGV2ZW50SWQgRksKICAgICAgICBzdHJpbmcgdXNlcklkIEZLCiAgICAgICAgc3RyaW5nIHFyQ29kZSBVSwogICAgICAgIGJvb2xlYW4gY2hlY2tlZEluCiAgICAgICAgZGF0ZXRpbWUgcmVnaXN0ZXJlZEF0CiAgICB9CiAgICBBbm5vdW5jZW1lbnQgewogICAgICAgIHN0cmluZyBpZCBQSwKICAgICAgICBzdHJpbmcgdGl0bGUKICAgICAgICBzdHJpbmcgY29udGVudAogICAgICAgIHN0cmluZyBldmVudElkIEZLCiAgICAgICAgc3RyaW5nIHByaW9yaXR5CiAgICAgICAgZGF0ZXRpbWUgY3JlYXRlZEF0CiAgICB9CiAgICBMaXZlVXBkYXRlIHsKICAgICAgICBzdHJpbmcgaWQgUEsKICAgICAgICBzdHJpbmcgZXZlbnRJZCBGSwogICAgICAgIHN0cmluZyB0eXBlCiAgICAgICAgc3RyaW5nIGNvbnRlbnQKICAgICAgICBzdHJpbmcgbWVkaWFVcmwKICAgICAgICBkYXRldGltZSBjcmVhdGVkQXQKICAgIH0NCg==)
+```mermaid
+erDiagram
+    User ||--o{ Registration : has
+    Event ||--o{ Registration : has
+    Event ||--o{ Announcement : has
+    Event ||--o{ LiveUpdate : has
+    User ||--o{ Event : "created by"
+    User {
+        string id PK
+        string name
+        string email UK
+        string password
+        string role
+    }
+    Event {
+        string id PK
+        string title
+        string description
+        string type
+        string venue
+        datetime startDate
+        datetime endDate
+        string coverImage
+        string status
+        string createdByID FK
+    }
+    Registration {
+        string id PK
+        string eventId FK
+        string userId FK
+        string qrCode UK
+        boolean checkedIn
+        datetime registeredAt
+    }
+    Announcement {
+        string id PK
+        string title
+        string content
+        string eventId FK
+        string priority
+        datetime createdAt
+    }
+    LiveUpdate {
+        string id PK
+        string eventId FK
+        string type
+        string content
+        string mediaUrl
+        datetime createdAt
+    }
+```
 
 ---
 
