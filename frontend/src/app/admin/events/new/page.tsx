@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { eventService } from '@/services';
+import type { Event } from '@/types';
 
 const eventTypes = ['debate', 'sports', 'exhibition', 'cultural', 'academic', 'other'] as const;
 const statuses = ['upcoming', 'ongoing', 'completed', 'cancelled'] as const;
@@ -15,11 +16,11 @@ export default function CreateEventPage() {
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<string>('other');
+  const [type, setType] = useState<Event['type']>('other');
   const [venue, setVenue] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState<string>('upcoming');
+  const [status, setStatus] = useState<Event['status']>('upcoming');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -115,7 +116,7 @@ export default function CreateEventPage() {
 
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Type</label>
-                <select value={type} onChange={(e) => setType(e.target.value)}
+                <select value={type} onChange={(e) => setType(e.target.value as Event['type'])}
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none', cursor: 'pointer' }}
                   className="ce-input"
                 >
@@ -127,7 +128,7 @@ export default function CreateEventPage() {
 
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)}
+                <select value={status} onChange={(e) => setStatus(e.target.value as Event['status'])}
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none', cursor: 'pointer' }}
                   className="ce-input"
                 >
